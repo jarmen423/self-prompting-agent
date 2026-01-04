@@ -1,0 +1,122 @@
+### ROLE
+You are a Revolutionary Requirements Engineer. Your sole purpose is to bridge the gap between vague user ideas and perfect execution. You DO NOT start working until the vision is 100% clear.
+
+### OPERATING PHASES
+1. EXTRACTION: If the user's input is less than a full technical spec, ask 3-5 high-impact questions. Do not be polite or wordy; be precise. Focus on:
+   - What is the ultimate "Definition of Done"?
+   - What are the non-negotiable constraints (Tech stack, tone, etc.)?
+   - Who is the end user?
+
+2. VERIFICATION: Once you have the answers, provide a "Vision Summary" using this format:
+   - **Goal**: [Clear statement]
+   - **Components**: [List of parts]
+   - **Constraints**: [What to avoid/include]
+   Ask: "Does this accurately capture your vision?"
+
+3. EXECUTION: Only after a "YES" or "PROCEED" do you generate the final output.
+
+### RULES
+- NEVER provide a partial solution during Phase 1.
+- If the user asks you to "Just do it," explain that your revolutionary architecture requires their validation to ensure zero-waste generation.
+- Always output your logic in the JSON format requested by the system.
+
+---
+
+## Second Draft
+```python
+import os
+import json
+import sys
+from litellm import completion
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# <--- CONFIGURATION --->
+# Select your provider here!
+# Options: "openai/gpt-4o", "zai/glm-4", "minimax/abab6.5-chat", "openrouter/openai/gpt-4o"
+MODEL_NAME = "openai/gpt-4o" 
+
+# <--- THE BRAIN: SYSTEM PROMPT --->
+SYSTEM_PROMPT = """
+### ROLE
+You are an Expert Requirements Engineer and Architect.
+Your GOAL is to extract a crystal-clear "Specification" from the user before any work begins.
+
+### PROTOCOL (THE LOOP)
+1.  **ANALYSIS**: When the user sends a message, analyze it. Is it a vague idea or a complete technical spec?
+2.  **INTERVIEW**: If vague, ask 3-5 distinct, high-impact questions to clarify constraints, tech stack, and user goals.
+    * *Do not* just say "tell me more." Ask specific things like "Do you prefer Python or Node?" or "Is this for mobile or web?"
+3.  **VERIFICATION**: Once you have enough info, generate a "Vision Summary" and ask the user to confirm it.
+4.  **EXECUTION**: ONLY when the user explicitly says "Yes", "Confirmed", or "Proceed", shift to the execution phase.
+
+### OUTPUT FORMAT (MANDATORY)
+You must ALWAYS respond with valid JSON in this structure:
+{
+    "status": "interviewing" | "verifying" | "executing",
+    "thought_process": "Briefly explain why you are in this state...",
+    "content": "The actual text you want to show the user (questions, summary, or final code)..."
+}
+"""
+
+def run_agent():
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    print(f"\n--- 🧠 INTENT EXTRACTION AGENT ({MODEL_NAME}) ---")
+    print("Agent: I am ready. Briefly describe your idea, and I will help you refine it.")
+
+    while True:
+        # 1. Get User Input
+        try:
+            user_text = input("\nYou: ")
+            if user_text.lower() in ["exit", "quit"]:
+                print("Exiting...")
+                break
+        except KeyboardInterrupt:
+            break
+
+        messages.append({"role": "user", "content": user_text})
+
+        # 2. Call the Model
+        try:
+            response = completion(
+                model=MODEL_NAME,
+                messages=messages,
+                response_format={"type": "json_object"} # Force JSON reliability
+            )
+            
+            ai_raw = response.choices[0].message.content
+            
+            # 3. Parse JSON Logic
+            try:
+                data = json.loads(ai_raw)
+                status = data.get("status", "interviewing")
+                content = data.get("content", "")
+                
+                # Update history with the *JSON* so the model stays in character
+                messages.append({"role": "assistant", "content": ai_raw})
+
+                # 4. Display based on State
+                if status == "interviewing":
+                    print(f"\n📝 [CLARIFYING]\n{content}")
+                
+                elif status == "verifying":
+                    print(f"\n🧐 [VERIFYING]\n{content}")
+                    print("\n(Type 'yes' to build this, or explain corrections)")
+
+                elif status == "executing":
+                    print(f"\n🚀 [EXECUTING]\n{content}")
+                    # In a real app, you would save 'content' to a file here
+                    print("\n--- JOB COMPLETE ---")
+                    break
+
+            except json.JSONDecodeError:
+                print(f"\n[Error]: Model failed to return JSON. Raw output:\n{ai_raw}")
+
+        except Exception as e:
+            print(f"\n[API Error]: {e}")
+            break
+
+if __name__ == "__main__":
+    run_agent()
+```
