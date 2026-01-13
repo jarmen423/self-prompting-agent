@@ -5,11 +5,11 @@ This document outlines the tasks required to transform the current "Second Draft
 ## Phase 1: Core Refactoring (The Brain)
 The current implementation mixes User I/O (`input`, `print`) with Agent Logic (`completion`, `json parsing`). We need to separate them.
 
-- [ ] **Create `agent_core.py`**
-    - [ ] Define an `Agent` class.
-    - [ ] Implement a `process_message(history, user_input)` method that returns the parsed JSON response (`status`, `content`, `thought_process`).
-    - [ ] Ensure the class is stateless (accepts history) or manages its own state cleanly, allowing for API usage.
-    - [ ] Move `SYSTEM_PROMPT` and `MODEL_NAME` configuration into this module.
+- [x] **Create `agent_core.py`**
+    - [x] Define an `Agent` class.
+    - [x] Implement a `process_message(history, user_input)` method that returns the parsed JSON response (`status`, `content`, `thought_process`).
+    - [x] Ensure the class is stateless (accepts history) or manages its own state cleanly, allowing for API usage.
+    - [x] Move `SYSTEM_PROMPT` and `MODEL_NAME` configuration into this module.
 
 ## Phase 2: Persistence
 The agent needs to be able to save its "Execution" results to the file system.
