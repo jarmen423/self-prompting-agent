@@ -14,10 +14,10 @@ The current implementation mixes User I/O (`input`, `print`) with Agent Logic (`
 ## Phase 2: Persistence
 The agent needs to be able to save its "Execution" results to the file system.
 
-- [ ] **Implement Output Handler**
-    - [ ] Create a utility function to save content to a file.
-    - [ ] In the `executing` state, trigger this save function.
-    - [ ] (Optional) Allow user to define filename in the prompt or via configuration.
+- [x] **Implement Output Handler**
+    - [x] Create a utility function to save content to a file.
+    - [x] In the `executing` state, trigger this save function.
+    - [x] (Optional) Allow user to define filename in the prompt or via configuration.
 
 ## Phase 3: Interfaces
 Implement the three required entry points using the shared `agent_core`.

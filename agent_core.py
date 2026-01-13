@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from litellm import completion
 from dotenv import load_dotenv
 
@@ -27,7 +28,8 @@ You must ALWAYS respond with valid JSON in this structure:
 {
     "status": "interviewing" | "verifying" | "executing",
     "thought_process": "Briefly explain why you are in this state...",
-    "content": "The actual text you want to show the user (questions, summary, or final code)..."
+    "content": "The actual text you want to show the user (questions, summary, or final code)...",
+    "filename": "(Optional) Suggested filename for the content if status is executing (e.g., 'spec.md', 'code.py')"
 }
 """
 
@@ -39,6 +41,35 @@ class Agent:
     def get_initial_history(self):
         """Returns the initial history with the system prompt."""
         return [{"role": "system", "content": self.system_prompt}]
+
+    def save_to_file(self, content, filename=None):
+        """
+        Saves content to a file in the 'output' directory.
+
+        Args:
+            content (str): The text content to save.
+            filename (str, optional): The filename. If None, generates a timestamped name.
+
+        Returns:
+            str: The full path to the saved file.
+        """
+        output_dir = "output"
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        if not filename:
+            timestamp = int(time.time())
+            filename = f"output_{timestamp}.md"
+
+        # Sanitize filename to prevent directory traversal (basic check)
+        filename = os.path.basename(filename)
+
+        filepath = os.path.join(output_dir, filename)
+
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        return filepath
 
     def process_message(self, history, user_input=None):
         """
@@ -52,8 +83,9 @@ class Agent:
             dict: Parsed JSON response from the agent plus the raw response content.
                   Structure:
                   {
-                      "parsed": { "status": "...", "content": "...", "thought_process": "..." },
-                      "raw": "..."
+                      "parsed": { "status": "...", "content": "...", "thought_process": "...", "filename": "..." },
+                      "raw": "...",
+                      "saved_to": "path/to/file" (if applicable)
                   }
         """
         # Create a copy of messages to send to the LLM
@@ -70,6 +102,7 @@ class Agent:
             )
 
             ai_raw = response.choices[0].message.content
+            saved_path = None
 
             try:
                 data = json.loads(ai_raw)
@@ -77,14 +110,20 @@ class Agent:
                 status = data.get("status", "interviewing")
                 content = data.get("content", "")
                 thought_process = data.get("thought_process", "")
+                filename = data.get("filename")
+
+                if status == "executing" and content:
+                    saved_path = self.save_to_file(content, filename)
 
                 return {
                     "parsed": {
                         "status": status,
                         "content": content,
-                        "thought_process": thought_process
+                        "thought_process": thought_process,
+                        "filename": filename
                     },
-                    "raw": ai_raw
+                    "raw": ai_raw,
+                    "saved_to": saved_path
                 }
 
             except json.JSONDecodeError:
