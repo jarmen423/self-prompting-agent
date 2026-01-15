@@ -22,10 +22,10 @@ The agent needs to be able to save its "Execution" results to the file system.
 ## Phase 3: Interfaces
 Implement the three required entry points using the shared `agent_core`.
 
-- [ ] **CLI Tool (`cli.py`)**
-    - [ ] Re-implement the current `while True` loop using the new `Agent` class.
-    - [ ] Add argument parsing (using `argparse` or `click`) for custom configuration (e.g., model selection).
-    - [ ] Ensure clean colored output (using `rich` or similar) for better UX.
+- [x] **CLI Tool (`cli.py`)**
+    - [x] Re-implement the current `while True` loop using the new `Agent` class.
+    - [x] Add argument parsing (using `argparse` or `click`) for custom configuration (e.g., model selection).
+    - [x] Ensure clean colored output (using `rich` or similar) for better UX.
 
 - [ ] **REST API (`server.py`)**
     - [ ] Initialize a **FastAPI** application.
