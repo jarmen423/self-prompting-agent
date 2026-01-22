@@ -15,25 +15,54 @@ st.title("🤖 Intent Extraction Agent")
 if "agent" not in st.session_state:
     st.session_state.agent = Agent()
 
-# Initialize Chat History
+# Initialize Chat History for LLM (includes system prompt and raw JSON responses)
+if "llm_history" not in st.session_state:
+    st.session_state.llm_history = st.session_state.agent.get_initial_history()
+
+# Initialize Chat History for Display (parsed content only, no system prompt)
 if "messages" not in st.session_state:
-    st.session_state.messages = st.session_state.agent.get_initial_history()
+    st.session_state.messages = []
 
 # Initialize Latest Thought Process
 if "latest_thought" not in st.session_state:
     st.session_state.latest_thought = "Waiting for agent activity..."
 
-# Sidebar for Thought Process - Using placeholder
+# Initialize Latest File (for persistent download)
+if "latest_file" not in st.session_state:
+    st.session_state.latest_file = None
+
+# Sidebar
 with st.sidebar:
     st.header("🧠 Thought Process")
     thought_placeholder = st.empty()
     thought_placeholder.info(st.session_state.latest_thought)
 
-# Display Chat Messages (excluding system prompt)
+    st.divider()
+
+    st.header("📂 Output")
+    download_placeholder = st.empty()
+
+    # Render persistent download button if exists
+    if st.session_state.latest_file and os.path.exists(st.session_state.latest_file):
+        filepath = st.session_state.latest_file
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                file_content = f.read()
+            filename = os.path.basename(filepath)
+            download_placeholder.download_button(
+                label=f"Download {filename}",
+                data=file_content,
+                file_name=filename,
+                mime="text/markdown",
+                key="persistent_download"
+            )
+        except Exception:
+            pass # Ignore read errors during initial render
+
+# Display Chat Messages
 for message in st.session_state.messages:
-    if message["role"] != "system":
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
 # User Input
 if prompt := st.chat_input("What would you like to build?"):
@@ -43,9 +72,14 @@ if prompt := st.chat_input("What would you like to build?"):
 
     # Process message with spinner
     with st.spinner("Thinking..."):
-        response_data = st.session_state.agent.process_message(st.session_state.messages, prompt)
+        # We pass the LLM history and the new prompt
+        response_data = st.session_state.agent.process_message(st.session_state.llm_history, prompt)
 
-    # Update state
+    # Update LLM History
+    st.session_state.llm_history.append({"role": "user", "content": prompt})
+    st.session_state.llm_history.append({"role": "assistant", "content": response_data["raw"]})
+
+    # Update Display History
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     parsed = response_data["parsed"]
@@ -58,7 +92,6 @@ if prompt := st.chat_input("What would you like to build?"):
     # Update thought process
     if thought_process:
         st.session_state.latest_thought = thought_process
-        # Update the placeholder immediately
         thought_placeholder.info(thought_process)
 
     # Display AI response
@@ -67,4 +100,21 @@ if prompt := st.chat_input("What would you like to build?"):
 
     # Check for file saving
     if status == "executing" and response_data.get("saved_to"):
-        st.success(f"✅ File saved to: `{response_data['saved_to']}`")
+        filepath = response_data['saved_to']
+        st.session_state.latest_file = filepath
+        st.success(f"✅ File saved to: `{filepath}`")
+
+        # Update download button immediately
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                file_content = f.read()
+            filename = os.path.basename(filepath)
+            download_placeholder.download_button(
+                label=f"Download {filename}",
+                data=file_content,
+                file_name=filename,
+                mime="text/markdown",
+                key="immediate_download"
+            )
+        except Exception as e:
+            st.error(f"Could not prepare download: {e}")
