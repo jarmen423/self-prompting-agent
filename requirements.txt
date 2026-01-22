@@ -1,4 +1,5 @@
 litellm
 python-dotenv
 rich
-streamlit
+fastapi
+uvicorn

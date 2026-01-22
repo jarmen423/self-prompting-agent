@@ -27,12 +27,12 @@ Implement the three required entry points using the shared `agent_core`.
     - [x] Add argument parsing (using `argparse` or `click`) for custom configuration (e.g., model selection).
     - [x] Ensure clean colored output (using `rich` or similar) for better UX.
 
-- [ ] **REST API (`server.py`)**
-    - [ ] Initialize a **FastAPI** application.
-    - [ ] Create an endpoint `POST /chat` that accepts `{ messages: [], model: "..." }`.
-    - [ ] Return the structured JSON response from the Agent.
-    - [ ] Create an endpoint `GET /health` for connectivity checks.
-    - [ ] Add API documentation (Swagger/OpenAPI is built-in with FastAPI).
+- [x] **REST API (`server.py`)**
+    - [x] Initialize a **FastAPI** application.
+    - [x] Create an endpoint `POST /chat` that accepts `{ messages: [], model: "..." }`.
+    - [x] Return the structured JSON response from the Agent.
+    - [x] Create an endpoint `GET /health` for connectivity checks.
+    - [x] Add API documentation (Swagger/OpenAPI is built-in with FastAPI).
 
 - [ ] **Web UI (`app.py`)**
     - [ ] Initialize a **Streamlit** or **Gradio** app.
