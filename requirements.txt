@@ -1,5 +1,9 @@
-litellm
-python-dotenv
-rich
-fastapi
-uvicorn
+litellm==1.44.1
+python-dotenv==1.0.1
+rich==13.7.1
+fastapi==0.112.0
+uvicorn==0.30.6
+streamlit==1.38.0
+pydantic==2.8.2
+requests==2.32.3
+httpx==0.27.0

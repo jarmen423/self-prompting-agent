@@ -34,25 +34,25 @@ Implement the three required entry points using the shared `agent_core`.
     - [x] Create an endpoint `GET /health` for connectivity checks.
     - [x] Add API documentation (Swagger/OpenAPI is built-in with FastAPI).
 
-- [ ] **Web UI (`app.py`)**
-    - [ ] Initialize a **Streamlit** or **Gradio** app.
-    - [ ] Create a chat interface that maintains session state.
-    - [ ] Connect the UI to the `Agent` class (or call the API if preferred, but direct import is simpler for a mono-repo).
-    - [ ] Display "Thought Process" and "Content" in distinct UI elements.
+- [x] **Web UI (`app.py`)**
+    - [x] Initialize a **Streamlit** or **Gradio** app.
+    - [x] Create a chat interface that maintains session state.
+    - [x] Connect the UI to the `Agent` class (or call the API if preferred, but direct import is simpler for a mono-repo).
+    - [x] Display "Thought Process" and "Content" in distinct UI elements.
 
 ## Phase 4: DevOps & Deployment
 Make the application "shippable" and "deployable".
 
-- [ ] **Dependency Management**
-    - [ ] Create a `requirements.txt` with locked versions (litellm, fastapi, uvicorn, streamlit, python-dotenv, etc.).
+- [x] **Dependency Management**
+    - [x] Create a `requirements.txt` with locked versions (litellm, fastapi, uvicorn, streamlit, python-dotenv, etc.).
 
-- [ ] **Dockerization**
-    - [ ] Create a `Dockerfile`.
-    - [ ] Configure it to expose necessary ports (e.g., 8000 for API, 8501 for Streamlit).
-    - [ ] Create a `docker-compose.yml` to run the API and UI services simultaneously (optional but recommended).
+- [x] **Dockerization**
+    - [x] Create a `Dockerfile`.
+    - [x] Configure it to expose necessary ports (e.g., 8000 for API, 8501 for Streamlit).
+    - [x] Create a `docker-compose.yml` to run the API and UI services simultaneously (optional but recommended).
 
 ## Phase 5: Testing & Quality
-- [ ] **Unit Tests**
-    - [ ] Test `agent_core` logic (mocking the LLM call) to ensure it correctly parses JSON and handles states.
-- [ ] **Integration Tests**
-    - [ ] Test the API endpoints.
+- [x] **Unit Tests**
+    - [x] Test `agent_core` logic (mocking the LLM call) to ensure it correctly parses JSON and handles states.
+- [x] **Integration Tests**
+    - [x] Test the API endpoints.
