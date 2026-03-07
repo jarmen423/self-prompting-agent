@@ -1,62 +1,64 @@
 import unittest
-from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
+import json
+from fastapi.testclient import TestClient
 from server import app
 
 class TestServer(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
 
-    def test_health_check(self):
+    def test_health(self):
         response = self.client.get("/health")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "ok"})
 
-    @patch('server.Agent')
-    def test_chat_endpoint_success(self, MockAgent):
-        # Mock the agent instance and its process_message method
-        mock_agent_instance = MockAgent.return_value
-        mock_response = {
-            "parsed": {
-                "status": "interviewing",
-                "content": "Hello",
-                "thought_process": "Greeting",
-                "filename": None
-            },
-            "raw": "...",
-            "saved_to": None
-        }
-        mock_agent_instance.process_message.return_value = mock_response
+    @patch('agent_core.completion')
+    def test_chat_endpoint_success(self, mock_completion):
+        # Mocking the response
+        mock_response_content = json.dumps({
+            "status": "interviewing",
+            "content": "Hello there!",
+            "thought_process": "Greeting user"
+        })
 
-        # Payload
+        mock_choice = MagicMock()
+        mock_choice.message.content = mock_response_content
+        mock_response = MagicMock()
+        mock_response.choices = [mock_choice]
+        mock_completion.return_value = mock_response
+
         payload = {
             "messages": [{"role": "user", "content": "Hi"}],
-            "model": "gpt-4-test"
+            "model": "gpt-4o"
         }
 
         response = self.client.post("/chat", json=payload)
 
-        # Verify response
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), mock_response)
+        data = response.json()
 
-        # Verify Agent was initialized with correct model
-        MockAgent.assert_called_with(model_name="gpt-4-test")
+        self.assertEqual(data["parsed"]["status"], "interviewing")
+        self.assertEqual(data["parsed"]["content"], "Hello there!")
+        self.assertEqual(data["raw"], mock_response_content)
 
-        # Verify process_message was called with history
-        mock_agent_instance.process_message.assert_called_with(history=payload["messages"])
-
-    @patch('server.Agent')
-    def test_chat_endpoint_error(self, MockAgent):
-        # Mock an exception
-        mock_agent_instance = MockAgent.return_value
-        mock_agent_instance.process_message.side_effect = Exception("Internal Error")
+    @patch('agent_core.completion')
+    def test_chat_endpoint_error(self, mock_completion):
+        # Mocking an exception
+        mock_completion.side_effect = Exception("API Down")
 
         payload = {
-            "messages": [{"role": "user", "content": "Hi"}]
+            "messages": [{"role": "user", "content": "Hi"}],
+            "model": "gpt-4o"
         }
 
         response = self.client.post("/chat", json=payload)
 
-        self.assertEqual(response.status_code, 500)
-        self.assertIn("Internal Error", response.json()["detail"])
+        self.assertEqual(response.status_code, 200) # Agent handles errors and returns JSON
+        data = response.json()
+
+        self.assertEqual(data["parsed"]["status"], "error")
+        self.assertIn("API Error", data["parsed"]["content"])
+
+if __name__ == '__main__':
+    unittest.main()
