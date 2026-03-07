@@ -46,10 +46,10 @@ Make the application "shippable" and "deployable".
 - [x] **Dependency Management**
     - [x] Create a `requirements.txt` with locked versions (litellm, fastapi, uvicorn, streamlit, python-dotenv, etc.).
 
-- [ ] **Dockerization**
-    - [ ] Create a `Dockerfile`.
-    - [ ] Configure it to expose necessary ports (e.g., 8000 for API, 8501 for Streamlit).
-    - [ ] Create a `docker-compose.yml` to run the API and UI services simultaneously (optional but recommended).
+- [x] **Dockerization**
+    - [x] Create a `Dockerfile`.
+    - [x] Configure it to expose necessary ports (e.g., 8000 for API, 8501 for Streamlit).
+    - [x] Create a `docker-compose.yml` to run the API and UI services simultaneously (optional but recommended).
 
 ## Phase 5: Testing & Quality
 - [x] **Unit Tests**
